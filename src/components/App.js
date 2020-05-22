@@ -11,9 +11,10 @@ class App extends Component {
   async componentDidMount() {
     await this.setup()
     await this.loadContractData()
-    // await this.initializeBalance()
+    await this.initializeBalance()
     // await this.handleEvents()
-    await this.fetchEvents()
+    // await this.fetchEvents()
+    await this.delegateVotes()
   }
 
   async setup() {
@@ -48,7 +49,7 @@ class App extends Component {
   }
 
   async initializeBalance() {
-    const compTransferred = '100000000000000000000000'; //100k (10% of token balance)
+    const compTransferred = '100000000000000000000000'; //100k (10% of token compBalance)
     let compSupBalance = await this.state.comp.methods.balanceOf(this.state.supplier).call()
     let compEmpBalance = await this.state.comp.methods.balanceOf(this.state.employee).call()
 
@@ -63,11 +64,15 @@ class App extends Component {
       .on('transactionHash', () => {
         console.log("Transferred 100k Comp tokens to employee")
       })
+      // await this.getBalance(this.state.supplier)
+      // await this.getBalance(this.state.employee)
+  }
 
-    compSupBalance = await this.state.comp.methods.balanceOf(this.state.supplier).call()
-    compEmpBalance = await this.state.comp.methods.balanceOf(this.state.employee).call()
-
-    console.log("Employee: ", compEmpBalance.toString() / 10e17, "Supplier", compSupBalance.toString() / 10e17)
+  async getBalance(address) {
+    const compBalance = await this.state.comp.methods.balanceOf(address).call()
+    console.log("COMP Balance of account:", address, 'is:', compBalance.toString() / 1e18)
+    const ethBalance = await this.state.web3.eth.getBalance(address)
+    console.log("ETHER Balance of account:", address, 'is:', this.state.web3.utils.fromWei(ethBalance, 'ether'))
   }
 
   async handleEvents() {
@@ -110,7 +115,7 @@ class App extends Component {
     let requestParameters = {
       "page_size": 150,            // number of results in a page
       "network": "mainnet",        // mainnet, ropsten
-      "order_by": "votes",         // "votes", "balance", "proposals_created"
+      "order_by": "votes",         // "votes", "compBalance", "proposals_created"
       "page_number": 1,         // see subsequent response's `pagination_summary` to specify the next page
       // addresses: ['0x123'],     // array of addresses to filter on
       // with_history: true,       // boolean, returns a list of transaction history for the accounts
@@ -126,12 +131,29 @@ class App extends Component {
     accounts.forEach((account) => {
       holders.push({
         "address": account.address,
-        "balance": parseFloat(account.balance).toFixed(4),
+        "compBalance": parseFloat(account.compBalance).toFixed(4),
         "vote_weight": parseFloat(account.vote_weight).toFixed(4) + '%',
         "delegate": account.delegate.address == 0 ? 'None' : account.delegate.address
       });
     });
     console.log("Token holders: ", holders)
+  }
+
+  async getVotes() {
+    const empVotes = await this.state.comp.methods.getCurrentVotes(this.state.employee).call()
+    const supVotes = await this.state.comp.methods.getCurrentVotes(this.state.supplier).call()
+    console.log("votes of supplier: ", supVotes.toString(), "votes of employee: ", empVotes.toString())
+  }
+
+  async delegateVotes() {
+    // await this.getBalance(this.state.employee)
+    await this.getVotes()
+    this.state.comp.methods.delegate(this.state.supplier)
+      .send({ from: this.state.supplier })
+    this.state.comp.methods.delegate(this.state.supplier)
+      .send({ from: this.state.employee })
+    await this.getVotes()
+    // await this.getBalance(this.state.employee)
   }
 
   constructor(props) {
