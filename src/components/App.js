@@ -12,13 +12,14 @@ class App extends Component {
     await this.setup()
     await this.loadContractData()
     // await this.initializeBalance()
-    await this.handleEvents()
+    // await this.handleEvents()
+    await this.fetchEvents()
   }
 
   async setup() {
-    const web3 = new Web3('https://mainnet.infura.io/v3/d9013721413341abba149a225b97a7bd');
+    // const web3 = new Web3('https://mainnet.infura.io/v3/d9013721413341abba149a225b97a7bd');
     // const web3 = new Web3('https://ropsten.infura.io/v3/d9013721413341abba149a225b97a7bd');
-    // const web3 = new Web3('http://127.0.0.1:8545');
+    const web3 = new Web3('http://127.0.0.1:8545');
 
     this.setState({ web3 })
 
@@ -103,6 +104,34 @@ class App extends Component {
     })
 
     console.log("All delegates and their voting weights: ", delegates);
+  }
+
+  async fetchEvents() {
+    let requestParameters = {
+      "page_size": 150,            // number of results in a page
+      "network": "mainnet",        // mainnet, ropsten
+      "order_by": "votes",         // "votes", "balance", "proposals_created"
+      "page_number": 1,         // see subsequent response's `pagination_summary` to specify the next page
+      // addresses: ['0x123'],     // array of addresses to filter on
+      // with_history: true,       // boolean, returns a list of transaction history for the accounts
+    };
+
+    requestParameters = '?' + new URLSearchParams(requestParameters).toString();
+
+    const response = await fetch(`https://api.compound.finance/api/v2/governance/accounts${requestParameters}`)
+    const result = await response.json()
+
+    let accounts = result.accounts;
+    let holders = [];
+    accounts.forEach((account) => {
+      holders.push({
+        "address": account.address,
+        "balance": parseFloat(account.balance).toFixed(4),
+        "vote_weight": parseFloat(account.vote_weight).toFixed(4) + '%',
+        "delegate": account.delegate.address == 0 ? 'None' : account.delegate.address
+      });
+    });
+    console.log("Token holders: ", holders)
   }
 
   constructor(props) {
