@@ -11,13 +11,14 @@ class App extends Component {
   async componentDidMount() {
     await this.setup()
     await this.loadContractData()
-    await this.initializeBalance()
+    // await this.initializeBalance()
+    await this.handleEvents()
   }
 
   async setup() {
-    // const web3 = new Web3('https://mainnet.infura.io/v3/d9013721413341abba149a225b97a7bd');
+    const web3 = new Web3('https://mainnet.infura.io/v3/d9013721413341abba149a225b97a7bd');
     // const web3 = new Web3('https://ropsten.infura.io/v3/d9013721413341abba149a225b97a7bd');
-    const web3 = new Web3('http://127.0.0.1:8545');
+    // const web3 = new Web3('http://127.0.0.1:8545');
 
     this.setState({ web3 })
 
@@ -50,7 +51,7 @@ class App extends Component {
     let compSupBalance = await this.state.comp.methods.balanceOf(this.state.supplier).call()
     let compEmpBalance = await this.state.comp.methods.balanceOf(this.state.employee).call()
 
-    console.log("Employee: ", compEmpBalance.toString()/10e17, "Supplier", compSupBalance.toString()/10e17)
+    console.log("Employee: ", compEmpBalance.toString() / 10e17, "Supplier", compSupBalance.toString() / 10e17)
 
     this.state.comp.methods.transfer(this.state.employee, compTransferred)
       .send({
@@ -65,16 +66,43 @@ class App extends Component {
     compSupBalance = await this.state.comp.methods.balanceOf(this.state.supplier).call()
     compEmpBalance = await this.state.comp.methods.balanceOf(this.state.employee).call()
 
-    console.log("Employee: ", compEmpBalance.toString()/10e17, "Supplier", compSupBalance.toString()/10e17)
+    console.log("Employee: ", compEmpBalance.toString() / 10e17, "Supplier", compSupBalance.toString() / 10e17)
+  }
 
-    // this.state.comp.getPastEvents('allEvents', {
-    //   fromBlock: 0,
-    //   toBlock: 'latest'
-    // }).then((val) => {
-    //   console.log("Value: ", val)
-    // }).catch((err) => {
-    //   console.log("Error: ", err)
-    // })
+  async handleEvents() {
+    const delegations = await this.state.comp.getPastEvents('DelegateVotesChanged', {
+      fromBlock: 0,
+      toBlock: 'latest'
+    })
+
+    // dictionary of {key: accounts, value: votes delegated to the account}
+    const delegateAccounts = {};
+
+    // Accounts appear multiple times as delegation changes over time
+    delegations.forEach(e => {
+      const { delegate, newBalance } = e.returnValues;
+      delegateAccounts[delegate] = newBalance;
+    });
+
+    const delegates = [];
+    Object.keys(delegateAccounts).forEach((account) => {
+      const voteWeight = +delegateAccounts[account];
+      if (voteWeight === 0) return;
+      delegates.push({
+        delegate: account,
+        vote_weight: voteWeight
+      });
+    });
+
+    delegates.sort((a, b) => {
+      return b.vote_weight - a.vote_weight;
+    })
+
+    delegates.forEach(d => {
+      d.vote_weight = (100 * ((d.vote_weight / 1e18) / 10000000)).toFixed(6) + '%';
+    })
+
+    console.log("All delegates and their voting weights: ", delegates);
   }
 
   constructor(props) {
