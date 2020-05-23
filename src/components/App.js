@@ -13,8 +13,10 @@ class App extends Component {
     await this.loadContractData()
     await this.initializeBalance()
     // await this.handleEvents()
-    // await this.fetchEvents()
-    await this.delegateVotes()
+    // await this.fetchGovAccountsEvents()
+    await this.fetchGovProposalsEvents()
+    await this.fetchGovProposalRecieptsEvents()
+    // await this.delegateVotes()
   }
 
   async setup() {
@@ -64,8 +66,8 @@ class App extends Component {
       .on('transactionHash', () => {
         console.log("Transferred 100k Comp tokens to employee")
       })
-      // await this.getBalance(this.state.supplier)
-      // await this.getBalance(this.state.employee)
+    // await this.getBalance(this.state.supplier)
+    // await this.getBalance(this.state.employee)
   }
 
   async getBalance(address) {
@@ -111,7 +113,7 @@ class App extends Component {
     console.log("All delegates and their voting weights: ", delegates);
   }
 
-  async fetchEvents() {
+  async fetchGovAccountsEvents() {
     let requestParameters = {
       "page_size": 150,            // number of results in a page
       "network": "mainnet",        // mainnet, ropsten
@@ -139,6 +141,47 @@ class App extends Component {
     console.log("Token holders: ", holders)
   }
 
+  async fetchGovProposalsEvents() {
+    let requestParameters = {
+      //"proposal_ids" [23, 25] List of ids to filter on
+      "state": ["pending", "active"], //"pending", "active", "canceled", "defeated", "succeeded", "queued", "expired", "executed"
+      "with_detail": true, // Default false, to include proposer and action data
+      "page_size": 100,
+      "page_number": 1,
+      "network": "mainnet",
+    }
+
+    requestParameters = '?' + new URLSearchParams(requestParameters).toString();
+
+    const response = await fetch(`https://api.compound.finance/api/v2/governance/proposals${requestParameters}`)
+    const result = await response.json()
+
+    let proposals = result.proposals
+
+    console.log("Proposals:", proposals)
+  }
+
+  async fetchGovProposalRecieptsEvents() {
+    let requestParameters = {
+      "proposal_id": 4, // List of ids to filter on
+      //"account": // Filter for proposals receipts for the given account address
+      //"support": // Filter for proposals receipts by support votes with True and against votes with false
+      "with_proposal_data": true, // Default false, to include a Proposal object
+      "page_size": 10,
+      "page_number": 1,
+      "network": "mainnet",
+    }
+
+    requestParameters = '?' + new URLSearchParams(requestParameters).toString();
+
+    const response = await fetch(`https://api.compound.finance/api/v2/governance/proposal_vote_receipts${requestParameters}`)
+    const result = await response.json()
+
+    let proposal_receipts = result.proposal_vote_receipts
+
+    console.log("Proposal receipts:", proposal_receipts)
+  }
+
   async getVotes() {
     const empVotes = await this.state.comp.methods.getCurrentVotes(this.state.employee).call()
     const supVotes = await this.state.comp.methods.getCurrentVotes(this.state.supplier).call()
@@ -155,6 +198,10 @@ class App extends Component {
     await this.getVotes()
     // await this.getBalance(this.state.employee)
   }
+
+  // async testSig(){
+
+  // }
 
   constructor(props) {
     super(props)
