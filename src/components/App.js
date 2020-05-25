@@ -1,8 +1,9 @@
-import React, { Component } from 'react';
+import React, { Component, useState } from 'react';
 import './App.css';
 import Web3 from 'web3'
 import compoundMain from '../abis/mainnet-abi.json'
 import compoundRopsten from '../abis/ropsten-abi.json'
+import Verification from '../abis/Verification.json'
 
 // import { legos } from "@studydefi/money-legos";
 
@@ -14,15 +15,32 @@ class App extends Component {
     await this.initializeBalance()
     // await this.handleEvents()
     // await this.fetchGovAccountsEvents()
-    await this.fetchGovProposalsEvents()
-    await this.fetchGovProposalRecieptsEvents()
+    // await this.fetchGovProposalsEvents()
+    // await this.fetchGovProposalRecieptsEvents()
     // await this.delegateVotes()
+    await this.testSig()
+    await this.validateSig()
   }
+
+  // async loadMetaMaskWeb3() {
+  //   if (window.ethereum) {
+  //     window.web3 = new Web3(window.ethereum)
+  //     await window.ethereum.enable()
+  //   }
+  //   else if (window.web3) {
+  //     window.web3 = new Web3(window.web3.currentProvider)
+  //   }
+  //   else {
+  //     window.alert('Non-Ethereum browser detected. You should consider trying MetaMask!')
+  //   }
+  // }
 
   async setup() {
     // const web3 = new Web3('https://mainnet.infura.io/v3/d9013721413341abba149a225b97a7bd');
     // const web3 = new Web3('https://ropsten.infura.io/v3/d9013721413341abba149a225b97a7bd');
     const web3 = new Web3('http://127.0.0.1:8545');
+    // const web3 = new Web3(window.ethereum);
+    // await window.ethereum.enable()
 
     this.setState({ web3 })
 
@@ -30,10 +48,10 @@ class App extends Component {
 
     const supplier = "0x19bc62ff7cd9ffd6bdced9802ff718f09f7259f1" //Has 5,075,076.31 COMP tokens
     this.setState({ employee: accounts[0], supplier })
-    console.log("Accounts: ", this.state.employee)
+    console.log("Accounts:", this.state.employee, "Accounts:", this.state.supplier)
 
     const networkId = await web3.eth.net.getId();
-    console.log("Net: ", networkId)
+    console.log("Net:", networkId)
 
     // This app only works with Ropsten or Main
     if (networkId !== 1 && networkId !== 3) {
@@ -46,8 +64,14 @@ class App extends Component {
     const compMainAddress = '0xc00e94Cb662C3520282E6f5717214004A7f26888';
     // const compRopAddress = '0x1Fe16De955718CFAb7A44605458AB023838C2793'
 
+    const verificationData = Verification.networks['1']
+
     const comp = new this.state.web3.eth.Contract(compoundMain.Comp, compMainAddress);
-    this.setState({ comp })
+    const verify = new this.state.web3.eth.Contract(Verification.abi, verificationData.address)
+
+    console.log("Comp:", comp, "Verify:", verify)
+
+    this.setState({ comp, verify })
   }
 
   async initializeBalance() {
@@ -199,17 +223,38 @@ class App extends Component {
     // await this.getBalance(this.state.employee)
   }
 
-  // async testSig(){
+  async testSig() {
+    const message = this.state.web3.utils.sha3("testing")
+    await this.state.web3.eth.sign(message, this.state.employee, (err, result) => {
+      if (err) {
+        console.log("Error:", err)
+      }
+      else {
+        this.setState({ signature: result, hashedMsg: message })
+      }
+    })
+    console.log("Signature:", this.state.signature, "Hashed Msg:", this.state.hashedMsg)
+  }
 
-  // }
+  async validateSig() {
+    this.state.verify.methods.recover(this.state.hashedMsg, this.state.signature).call().then(function (result) {
+      console.log('Recover', result)
+    })
+    console.log("Account", this.state.employee)
+    // console.log("Validation results:", res.toString())
+  }
 
   constructor(props) {
     super(props)
     this.state = {
       web3: {},
       comp: {},
+      verify: {},
       employee: '',
       supplier: '',
+
+      signature: '',
+      hashedMsg: '',
     }
   }
 
