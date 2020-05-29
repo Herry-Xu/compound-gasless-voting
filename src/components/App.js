@@ -1,9 +1,11 @@
-import React, { Component, useState } from 'react';
+import React, { Component } from 'react';
 import './App.css';
 import Web3 from 'web3'
 import compoundMain from '../abis/mainnet-abi.json'
 import compoundRopsten from '../abis/ropsten-abi.json'
 import Verification from '../abis/Verification.json'
+import MyContract from '../abis/MyContract.json'
+import MyTokens from './MyTokens'
 
 // import { legos } from "@studydefi/money-legos";
 
@@ -12,14 +14,17 @@ class App extends Component {
   async componentDidMount() {
     await this.setup()
     await this.loadContractData()
-    await this.initializeBalance()
+    // await this.initBalance()
     // await this.handleEvents()
     // await this.fetchGovAccountsEvents()
     // await this.fetchGovProposalsEvents()
     // await this.fetchGovProposalRecieptsEvents()
     // await this.delegateVotes()
-    await this.testSig()
-    await this.validateSig()
+    // await this.testSig()
+    await this.updateCompBalance(this.state.employee)
+    await this.getEmpVotes()
+    // await this.testGovern()
+    // await this.validateSig()
   }
 
   // async loadMetaMaskWeb3() {
@@ -41,17 +46,15 @@ class App extends Component {
     const web3 = new Web3('http://127.0.0.1:8545');
     // const web3 = new Web3(window.ethereum);
     // await window.ethereum.enable()
-
     this.setState({ web3 })
 
     const accounts = await web3.eth.getAccounts();
 
     const supplier = "0x19bc62ff7cd9ffd6bdced9802ff718f09f7259f1" //Has 5,075,076.31 COMP tokens
-    this.setState({ employee: accounts[0], supplier })
-    console.log("Accounts:", this.state.employee, "Accounts:", this.state.supplier)
+    this.setState({ employee: accounts[0], supplier, organizations: accounts.slice(1,11) })
+    console.log("Accounts:", this.state.organizations)
 
     const networkId = await web3.eth.net.getId();
-    console.log("Net:", networkId)
 
     // This app only works with Ropsten or Main
     if (networkId !== 1 && networkId !== 3) {
@@ -63,23 +66,24 @@ class App extends Component {
   async loadContractData() {
     const compMainAddress = '0xc00e94Cb662C3520282E6f5717214004A7f26888';
     // const compRopAddress = '0x1Fe16De955718CFAb7A44605458AB023838C2793'
+    const mainnetId = '1'
 
-    const verificationData = Verification.networks['1']
+    const verificationData = Verification.networks[mainnetId]
+    const myContractData = MyContract.networks[mainnetId]
 
     const comp = new this.state.web3.eth.Contract(compoundMain.Comp, compMainAddress);
     const verify = new this.state.web3.eth.Contract(Verification.abi, verificationData.address)
+    const mycontract = new this.state.web3.eth.Contract(MyContract.abi, myContractData.address)
 
-    console.log("Comp:", comp, "Verify:", verify)
-
-    this.setState({ comp, verify })
+    this.setState({ comp, verify, mycontract })
   }
 
-  async initializeBalance() {
+  async initBalance() {
     const compTransferred = '100000000000000000000000'; //100k (10% of token compBalance)
     let compSupBalance = await this.state.comp.methods.balanceOf(this.state.supplier).call()
     let compEmpBalance = await this.state.comp.methods.balanceOf(this.state.employee).call()
 
-    console.log("Employee: ", compEmpBalance.toString() / 10e17, "Supplier", compSupBalance.toString() / 10e17)
+    console.log("Employee: ", compEmpBalance.toString() / 1e18, "Supplier", compSupBalance.toString() / 1e18)
 
     this.state.comp.methods.transfer(this.state.employee, compTransferred)
       .send({
@@ -94,11 +98,16 @@ class App extends Component {
     // await this.getBalance(this.state.employee)
   }
 
-  async getBalance(address) {
+  async updateCompBalance(address) {
     const compBalance = await this.state.comp.methods.balanceOf(address).call()
-    console.log("COMP Balance of account:", address, 'is:', compBalance.toString() / 1e18)
+    // console.log("COMP Balance of account:", address, 'is:', compBalance.toString() / 1e18)
+    this.setState({ empTokens: (compBalance.toString() / 1e18).toFixed(2) })
+  }
+
+  async updateEthBalance(address) {
     const ethBalance = await this.state.web3.eth.getBalance(address)
-    console.log("ETHER Balance of account:", address, 'is:', this.state.web3.utils.fromWei(ethBalance, 'ether'))
+    // console.log("ETHER Balance of account:", address, 'is:', this.state.web3.utils.fromWei(ethBalance, 'ether'))
+    // this.setState({ ethBalance : this.state.web3.utils.fromWei(ethBalance, 'ether') })
   }
 
   async handleEvents() {
@@ -206,10 +215,14 @@ class App extends Component {
     console.log("Proposal receipts:", proposal_receipts)
   }
 
-  async getVotes() {
+  async getEmpVotes() {
     const empVotes = await this.state.comp.methods.getCurrentVotes(this.state.employee).call()
+    this.setState({ empVotes: empVotes.toString() })
+  }
+
+  async getSupVotes() {
     const supVotes = await this.state.comp.methods.getCurrentVotes(this.state.supplier).call()
-    console.log("votes of supplier: ", supVotes.toString(), "votes of employee: ", empVotes.toString())
+    this.setState({ supVotes })
   }
 
   async delegateVotes() {
@@ -244,18 +257,46 @@ class App extends Component {
     // console.log("Validation results:", res.toString())
   }
 
+  async testGovern() {
+    const nonce = await this.state.web3.eth.getTransactionCount(this.state.employee);
+    console.log("Nonce:", nonce)
+
+    const expiry = 1896912000
+
+    await this.state.mycontract.methods.decompose(this.state.employee, nonce, expiry, this.state.signature).call()
+
+    console.log("sad")
+
+    // const tx = await this.state.comp.methods.delegateBySig(this.state.supplier, 1896912000, number2, v, r, s).send({
+    //   from: this.state.employee,
+    //   gasLimit: this.state.web3.utils.toHex(600000),
+    //   gasPrice: this.state.web3.utils.toHex(20000000000),
+    //   chainId: 1
+    // })
+  }
+
+  async getCompoundNonces() {
+  }
+
   constructor(props) {
     super(props)
     this.state = {
       web3: {},
       comp: {},
       verify: {},
+      mycontract: {},
       employee: '',
       supplier: '',
+      organizations: [],
+
+      empTokens: '',
+      empVotes: '',
 
       signature: '',
       hashedMsg: '',
+
     }
+    this.initBalance=this.initBalance.bind(this);
   }
 
   render() {
@@ -263,7 +304,14 @@ class App extends Component {
       <div className="App">
         <main role="main" className="col-lg-12 d-flex text-center">
           <div className="content mr-auto ml-auto">
-            <code>Insert React Elements here</code>
+            <MyTokens
+              initBalance={this.initBalance}
+              empTokens={this.state.empTokens}
+              empVotes={this.state.empVotes}
+            />
+            {/* <Organizations
+              org
+            /> */}
           </div>
         </main>
       </div>
