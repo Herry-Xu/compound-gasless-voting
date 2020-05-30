@@ -2,8 +2,21 @@ import React, { Component } from 'react';
 
 class MyTokens extends Component {
 
+  componentDidUpdate(prevProps) {
+    if (prevProps.empTokens !== this.props.empTokens) {
+      this.setState({ empTokens: this.props.empTokens })
+    }
+    if (prevProps.empVotes !== this.props.empVotes) {
+      this.setState({ empVotes: this.props.empVotes })
+    }
+  }
+
   constructor(props) {
     super(props)
+    this.state = {
+      empTokens: this.props.empTokens,
+      empVotes: this.props.empVotes,
+    }
   }
 
   render() {
@@ -16,8 +29,8 @@ class MyTokens extends Component {
           Initialize COMP Balance
       </button>
         <div>
-          <p>Number of Comp Tokens I Own: {this.props.empTokens}</p><br />
-          <p>Number of Votes I Have: {this.props.empVotes}</p>
+          <p>Number of Comp Tokens I Own: {this.state.empTokens}</p><br />
+          <p>Number of Votes I Have: {this.state.empVotes}</p>
         </div>
       </div>
     )

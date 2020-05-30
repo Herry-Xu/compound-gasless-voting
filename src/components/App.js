@@ -6,6 +6,7 @@ import compoundRopsten from '../abis/ropsten-abi.json'
 import Verification from '../abis/Verification.json'
 import MyContract from '../abis/MyContract.json'
 import MyTokens from './MyTokens'
+import Organizations from './Organizations'
 
 // import { legos } from "@studydefi/money-legos";
 
@@ -21,7 +22,7 @@ class App extends Component {
     // await this.fetchGovProposalRecieptsEvents()
     // await this.delegateVotes()
     // await this.testSig()
-    await this.updateCompBalance(this.state.employee)
+    await this.updateCompBalance(this.state.empAddress)
     await this.getEmpVotes()
     // await this.testGovern()
     // await this.validateSig()
@@ -50,9 +51,9 @@ class App extends Component {
 
     const accounts = await web3.eth.getAccounts();
 
-    const supplier = "0x19bc62ff7cd9ffd6bdced9802ff718f09f7259f1" //Has 5,075,076.31 COMP tokens
-    this.setState({ employee: accounts[0], supplier, organizations: accounts.slice(1,11) })
-    console.log("Accounts:", this.state.organizations)
+    const supAddress = "0x19bc62ff7cd9ffd6bdced9802ff718f09f7259f1" //Has 5,075,076.31 COMP tokens
+    this.setState({ empAddress: accounts[0], supAddress, orgAddresses: accounts.slice(1, 11) })
+    console.log("Accounts:", this.state.orgAddresses)
 
     const networkId = await web3.eth.net.getId();
 
@@ -80,22 +81,23 @@ class App extends Component {
 
   async initBalance() {
     const compTransferred = '100000000000000000000000'; //100k (10% of token compBalance)
-    let compSupBalance = await this.state.comp.methods.balanceOf(this.state.supplier).call()
-    let compEmpBalance = await this.state.comp.methods.balanceOf(this.state.employee).call()
+    let compSupBalance = await this.state.comp.methods.balanceOf(this.state.supAddress).call()
+    let compEmpBalance = await this.state.comp.methods.balanceOf(this.state.empAddress).call()
 
-    console.log("Employee: ", compEmpBalance.toString() / 1e18, "Supplier", compSupBalance.toString() / 1e18)
+    console.log("empAddress: ", compEmpBalance.toString() / 1e18, "SupAddress", compSupBalance.toString() / 1e18)
 
-    this.state.comp.methods.transfer(this.state.employee, compTransferred)
+    this.state.comp.methods.transfer(this.state.empAddress, compTransferred)
       .send({
-        from: this.state.supplier,
+        from: this.state.supAddress,
         gasLimit: this.state.web3.utils.toHex(500000),
         gasPrice: this.state.web3.utils.toHex(20000000000)
       })
       .on('transactionHash', () => {
-        console.log("Transferred 100k Comp tokens to employee")
+        console.log("Transferred 100k Comp tokens to empAddress")
       })
-    // await this.getBalance(this.state.supplier)
-    // await this.getBalance(this.state.employee)
+    await this.updateCompBalance(this.state.empAddress)
+    // await this.getBalance(this.state.supAddress)
+    // await this.getBalance(this.state.empAddress)
   }
 
   async updateCompBalance(address) {
@@ -216,29 +218,29 @@ class App extends Component {
   }
 
   async getEmpVotes() {
-    const empVotes = await this.state.comp.methods.getCurrentVotes(this.state.employee).call()
+    const empVotes = await this.state.comp.methods.getCurrentVotes(this.state.empAddress).call()
     this.setState({ empVotes: empVotes.toString() })
   }
 
   async getSupVotes() {
-    const supVotes = await this.state.comp.methods.getCurrentVotes(this.state.supplier).call()
+    const supVotes = await this.state.comp.methods.getCurrentVotes(this.state.supAddress).call()
     this.setState({ supVotes })
   }
 
   async delegateVotes() {
-    // await this.getBalance(this.state.employee)
+    // await this.getBalance(this.state.empAddress)
     await this.getVotes()
-    this.state.comp.methods.delegate(this.state.supplier)
-      .send({ from: this.state.supplier })
-    this.state.comp.methods.delegate(this.state.supplier)
-      .send({ from: this.state.employee })
+    this.state.comp.methods.delegate(this.state.supAddress)
+      .send({ from: this.state.supAddress })
+    this.state.comp.methods.delegate(this.state.supAddress)
+      .send({ from: this.state.empAddress })
     await this.getVotes()
-    // await this.getBalance(this.state.employee)
+    // await this.getBalance(this.state.empAddress)
   }
 
   async testSig() {
     const message = this.state.web3.utils.sha3("testing")
-    await this.state.web3.eth.sign(message, this.state.employee, (err, result) => {
+    await this.state.web3.eth.sign(message, this.state.empAddress, (err, result) => {
       if (err) {
         console.log("Error:", err)
       }
@@ -253,22 +255,22 @@ class App extends Component {
     this.state.verify.methods.recover(this.state.hashedMsg, this.state.signature).call().then(function (result) {
       console.log('Recover', result)
     })
-    console.log("Account", this.state.employee)
+    console.log("Account", this.state.empAddress)
     // console.log("Validation results:", res.toString())
   }
 
   async testGovern() {
-    const nonce = await this.state.web3.eth.getTransactionCount(this.state.employee);
+    const nonce = await this.state.web3.eth.getTransactionCount(this.state.empAddress);
     console.log("Nonce:", nonce)
 
     const expiry = 1896912000
 
-    await this.state.mycontract.methods.decompose(this.state.employee, nonce, expiry, this.state.signature).call()
+    await this.state.mycontract.methods.decompose(this.state.empAddress, nonce, expiry, this.state.signature).call()
 
     console.log("sad")
 
-    // const tx = await this.state.comp.methods.delegateBySig(this.state.supplier, 1896912000, number2, v, r, s).send({
-    //   from: this.state.employee,
+    // const tx = await this.state.comp.methods.delegateBySig(this.state.supAddress, 1896912000, number2, v, r, s).send({
+    //   from: this.state.empAddress,
     //   gasLimit: this.state.web3.utils.toHex(600000),
     //   gasPrice: this.state.web3.utils.toHex(20000000000),
     //   chainId: 1
@@ -285,18 +287,18 @@ class App extends Component {
       comp: {},
       verify: {},
       mycontract: {},
-      employee: '',
-      supplier: '',
-      organizations: [],
+      empAddress: '',
+      supAddress: '',
+      orgAddresses: [],
 
-      empTokens: '',
-      empVotes: '',
+      empTokens: 0,
+      empVotes: 0,
 
       signature: '',
       hashedMsg: '',
 
     }
-    this.initBalance=this.initBalance.bind(this);
+    this.initBalance = this.initBalance.bind(this);
   }
 
   render() {
@@ -309,9 +311,9 @@ class App extends Component {
               empTokens={this.state.empTokens}
               empVotes={this.state.empVotes}
             />
-            {/* <Organizations
-              org
-            /> */}
+            <Organizations
+              orgAddresses={this.state.orgAddresses}
+            />
           </div>
         </main>
       </div>
