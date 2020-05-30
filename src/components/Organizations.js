@@ -1,50 +1,45 @@
 import React, { Component } from 'react';
+import OrganizationItem from './OrganizationItem'
 
 class Organizations extends Component {
 
-  async componentDidMount() {
-    // await this.setOrganizations()
+  async componentDidUpdate(prevProps) {
+    if (prevProps.orgAddresses !== this.props.orgAddresses) {
+      await this.setState({ orgAddresses: this.props.orgAddresses })
+      this.setOrganizations()
+    }
   }
 
   async setOrganizations() {
-    console.log("Org Addresses:", this.props.orgAddresses)
-    let keys = Object.keys(this.state.orgs);
-    for (var i = 0; i < keys.length; i++) {
-      this.state.orgs[keys[i]]['address'] = this.props.orgAddresses[i]
-    }
-
-    console.log(this.state.orgs)
-
-    // for (var key in orgs){
-    //   console.log(key);
-    //   orgs[key]['address'] = this.prop
-    // }
+    const organizations = [
+      { name: 'Apple', address: '' },
+      { name: 'Amazon', address: '' },
+      { name: 'Ethereum', address: '' },
+    ]
+    organizations.forEach((comp, index) => {
+      comp['address'] = this.state.orgAddresses[index]
+    })
+    this.setState({ organizations })
   }
 
   constructor(props) {
     super(props)
     this.state = {
-      orgs: {
-        'Apple': { 'address': '', 'logo': 'apple.jpg' },
-        'Amazon': { 'address': '', 'logo': 'amazon.jpg' },
-        'Ethereum': { 'address': '', 'logo': 'compound.jpg' }
-      }
+      orgAddresses: this.props.orgAddresses,
+      organizations: [],
     }
   }
 
   render() {
     return (
-      <div>
-        <button
-          onChange={(event) => {
-            this.setOrganizations()
-          }}>
-          Set Org
-        </button>
-        Organizations:
-        {this.state.orgs['Amazon']['address']}
-        {this.state.orgs['Amazon']['logo']}
-      </div>
+      <ul>
+        {this.state.organizations && this.state.organizations.map((org) => {
+          return <OrganizationItem
+            name = {org.name}
+            address = {org.address}
+          />
+        })}
+      </ul>
     )
   }
 }
