@@ -15,31 +15,14 @@ class App extends Component {
   async componentDidMount() {
     await this.setup()
     await this.loadContractData()
-    // await this.initBalance()
-    // await this.handleEvents()
     // await this.fetchGovAccountsEvents()
     // await this.fetchGovProposalsEvents()
     // await this.fetchGovProposalRecieptsEvents()
-    // await this.delegateVotes()
     // await this.testSig()
     await this.updateCompBalance(this.state.empAddress)
-    await this.getEmpVotes()
     // await this.testGovern()
     // await this.validateSig()
   }
-
-  // async loadMetaMaskWeb3() {
-  //   if (window.ethereum) {
-  //     window.web3 = new Web3(window.ethereum)
-  //     await window.ethereum.enable()
-  //   }
-  //   else if (window.web3) {
-  //     window.web3 = new Web3(window.web3.currentProvider)
-  //   }
-  //   else {
-  //     window.alert('Non-Ethereum browser detected. You should consider trying MetaMask!')
-  //   }
-  // }
 
   async setup() {
     // const web3 = new Web3('https://mainnet.infura.io/v3/d9013721413341abba149a225b97a7bd');
@@ -61,7 +44,6 @@ class App extends Component {
     if (networkId !== 1 && networkId !== 3) {
       alert('Please select the Main or Ropsten network.');
     }
-
   }
 
   async loadContractData() {
@@ -112,6 +94,7 @@ class App extends Component {
     // this.setState({ ethBalance : this.state.web3.utils.fromWei(ethBalance, 'ether') })
   }
 
+  //Can't be used with fork because event data is gone
   async handleEvents() {
     const delegations = await this.state.comp.getPastEvents('DelegateVotesChanged', {
       fromBlock: 0,
@@ -148,6 +131,7 @@ class App extends Component {
     console.log("All delegates and their voting weights: ", delegates);
   }
 
+  //TODO: Separate fetches in another file
   async fetchGovAccountsEvents() {
     let requestParameters = {
       "page_size": 150,            // number of results in a page
@@ -217,24 +201,18 @@ class App extends Component {
     console.log("Proposal receipts:", proposal_receipts)
   }
 
-  async getEmpVotes() {
-    const empVotes = await this.state.comp.methods.getCurrentVotes(this.state.empAddress).call()
-    this.setState({ empVotes: empVotes.toString() })
+  async getVotes(company, address) {
+    const votes = await this.state.comp.methods.getCurrentVotes(address).call()
+    this.setState({ orgVotes: { [company]: (votes.toString() / 1e18).toFixed(2) } })
   }
 
-  async getSupVotes() {
-    const supVotes = await this.state.comp.methods.getCurrentVotes(this.state.supAddress).call()
-    this.setState({ supVotes })
-  }
-
-  async delegateVotes() {
+  async delegateVotes(company, address) {
     // await this.getBalance(this.state.empAddress)
-    await this.getVotes()
-    this.state.comp.methods.delegate(this.state.supAddress)
-      .send({ from: this.state.supAddress })
-    this.state.comp.methods.delegate(this.state.supAddress)
+    this.state.comp.methods.delegate(address)
       .send({ from: this.state.empAddress })
-    await this.getVotes()
+      .on('transactionHash', (hash) => {
+        this.getVotes(company, address)
+      })
     // await this.getBalance(this.state.empAddress)
   }
 
@@ -290,6 +268,7 @@ class App extends Component {
       empAddress: '',
       supAddress: '',
       orgAddresses: [],
+      orgVotes: {},
 
       empTokens: 0,
       empVotes: 0,
@@ -299,6 +278,7 @@ class App extends Component {
 
     }
     this.initBalance = this.initBalance.bind(this);
+    this.delegateVotes = this.delegateVotes.bind(this);
   }
 
   render() {
@@ -313,6 +293,8 @@ class App extends Component {
             />
             <Organizations
               orgAddresses={this.state.orgAddresses}
+              orgVotes={this.state.orgVotes}
+              delegateVotes={this.delegateVotes}
             />
           </div>
         </main>
