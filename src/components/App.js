@@ -7,6 +7,7 @@ import Verification from '../abis/Verification.json'
 import MyContract from '../abis/MyContract.json'
 import MyTokens from './MyTokens'
 import Organizations from './Organizations'
+import NavBar from './NavBar'
 
 // import { legos } from "@studydefi/money-legos";
 
@@ -283,22 +284,25 @@ class App extends Component {
 
   render() {
     return (
-      <div className="App">
-        <main role="main" className="col-lg-12 d-flex text-center">
-          <div className="content mr-auto ml-auto">
-            <MyTokens
-              initBalance={this.initBalance}
-              empTokens={this.state.empTokens}
-              empVotes={this.state.empVotes}
-            />
-            <Organizations
-              orgAddresses={this.state.orgAddresses}
-              orgVotes={this.state.orgVotes}
-              delegateVotes={this.delegateVotes}
-            />
-          </div>
-        </main>
-      </div>
+      <React.Fragment>
+        <NavBar />
+        <div className="App">
+          <main role="main" className="col-lg-12 d-flex text-center">
+            <div className="content mr-auto ml-auto">
+              <MyTokens
+                initBalance={this.initBalance}
+                empTokens={this.state.empTokens}
+                empVotes={this.state.empVotes}
+              />
+              <Organizations
+                orgAddresses={this.state.orgAddresses}
+                orgVotes={this.state.orgVotes}
+                delegateVotes={this.delegateVotes}
+              />
+            </div>
+          </main>
+        </div>
+      </React.Fragment>
     );
   }
 }
