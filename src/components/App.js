@@ -288,18 +288,16 @@ class App extends Component {
         <NavBar />
         <div className="App">
           <main role="main" className="col-lg-12 d-flex text-center">
-            <div className="content mr-auto ml-auto">
-              <MyTokens
-                initBalance={this.initBalance}
-                empTokens={this.state.empTokens}
-                empVotes={this.state.empVotes}
-              />
-              <Organizations
-                orgAddresses={this.state.orgAddresses}
-                orgVotes={this.state.orgVotes}
-                delegateVotes={this.delegateVotes}
-              />
-            </div>
+            <MyTokens
+              initBalance={this.initBalance}
+              empTokens={this.state.empTokens}
+              empVotes={this.state.empVotes}
+            />
+            <Organizations
+              orgAddresses={this.state.orgAddresses}
+              orgVotes={this.state.orgVotes}
+              delegateVotes={this.delegateVotes}
+            />
           </main>
         </div>
       </React.Fragment>

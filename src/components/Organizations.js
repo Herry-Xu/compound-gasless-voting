@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import OrganizationItem from './OrganizationItem'
+import {Container, Grid} from '@material-ui/core'
 
 class Organizations extends Component {
 
@@ -44,16 +45,20 @@ class Organizations extends Component {
 
   render() {
     return (
-      <ul>
-        {this.state.organizations && this.state.organizations.map((org) =>
-          <OrganizationItem
-            name={org.name}
-            address={org.address}
-            votes={org.votes}
-            delegateVotes={this.props.delegateVotes}
-          />
-        )}
-      </ul>
+      <Container>
+        <Grid container spacing={4}>
+          {this.state.organizations && this.state.organizations.map((org) =>
+            <Grid item key={org.name} xs={12} sm={6} md={4}>
+              <OrganizationItem
+                name={org.name}
+                address={org.address}
+                votes={org.votes}
+                delegateVotes={this.props.delegateVotes}
+              />
+            </Grid>
+          )}
+        </Grid>
+      </Container>
     )
   }
 }
