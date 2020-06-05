@@ -1,6 +1,13 @@
 import React, { Component } from 'react';
 import OrganizationItem from './OrganizationItem'
-import {Container, Grid} from '@material-ui/core'
+import {withStyles, Container, Grid} from '@material-ui/core'
+
+const styles = theme => ({
+  cardGrid: {
+    paddingTop: theme.spacing(8),
+    paddingBottom: theme.spacing(8),
+  },
+});
 
 class Organizations extends Component {
 
@@ -44,8 +51,9 @@ class Organizations extends Component {
   }
 
   render() {
+    const { classes } = this.props;
     return (
-      <Container>
+      <Container className={classes.cardGrid} maxWidth="md">
         <Grid container spacing={4}>
           {this.state.organizations && this.state.organizations.map((org) =>
             <Grid item key={org.name} xs={12} sm={6} md={4}>
@@ -63,4 +71,4 @@ class Organizations extends Component {
   }
 }
 
-export default Organizations
+export default withStyles(styles)(Organizations)

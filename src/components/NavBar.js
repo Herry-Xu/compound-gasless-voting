@@ -21,18 +21,16 @@ class NavBar extends Component {
   render() {
     // const { classes } = this.props;
     return (
-      <Container>
-        <AppBar position="static">
-          <Toolbar>
-            <IconButton edge="start" color="inherit" aria-label="menu">
-              <MenuIcon />
-            </IconButton>
-            <Typography variant="h6" >
-              VotersVote
+      <AppBar position="relative">
+        <Toolbar>
+          <IconButton edge="start" color="inherit" aria-label="menu">
+            <MenuIcon />
+          </IconButton>
+          <Typography variant="h6" >
+            VotersVote
             </Typography>
-          </Toolbar>
-        </AppBar>
-      </Container>
+        </Toolbar>
+      </AppBar>
     );
   }
 }
