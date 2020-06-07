@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import OrganizationItem from './OrganizationItem'
-import {withStyles, Container, Grid} from '@material-ui/core'
+import { Container, Grid } from '@material-ui/core'
+
+import { withStyles } from '@material-ui/core/styles';
 
 const styles = theme => ({
   cardGrid: {

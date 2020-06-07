@@ -285,7 +285,9 @@ class App extends Component {
   render() {
     return (
       <React.Fragment>
-        <NavBar />
+        <NavBar
+          account={this.state.empAddress}
+        />
         <div className="App">
           <main>
             <MyTokens

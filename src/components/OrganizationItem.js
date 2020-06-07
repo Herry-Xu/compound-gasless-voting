@@ -1,5 +1,7 @@
 import React, { Component } from 'react'
-import { withStyles, Card, CardMedia, CardContent, CardActions, Typography, Button } from '@material-ui/core'
+import { Card, CardMedia, CardContent, CardActions, Typography, Button } from '@material-ui/core'
+
+import { withStyles } from '@material-ui/core/styles';
 
 const styles = theme => ({
   root: {
@@ -23,7 +25,7 @@ class OrganizationItem extends Component {
         <CardMedia
           className={classes.cardMedia}
           image={require(`../images/${this.props.name}.png`)}
-          title="Nothing at all"
+          title={this.props.name}
         />
         <CardContent className={classes.cardContent}>
           <Typography gutterBottom variant="h5" component="h2">
