@@ -45,7 +45,7 @@ class NavBar extends Component {
           {this.props.account ?
             <div className={classes.parent}>
               <Typography className={classes.cardText} variant="subtitle2">
-                My ETH Address: {this.props.account}
+                <b>My ETH Address: </b>{this.props.account}
               </Typography>
               <img
                 className={classes.cardMedia}

@@ -5,7 +5,7 @@ import { withStyles } from '@material-ui/core/styles';
 
 const styles = theme => ({
   root: {
-    maxWidth: 345,
+    maxWidth: 500,
   },
   cardMedia: {
     height: 0,
@@ -13,6 +13,7 @@ const styles = theme => ({
   },
   cardContent: {
     flexGrow: 1,
+    textAlign: 'left',
   },
 });
 
@@ -28,18 +29,20 @@ class OrganizationItem extends Component {
           title={this.props.name}
         />
         <CardContent className={classes.cardContent}>
-          <Typography gutterBottom variant="h5" component="h2">
-            {this.props.name}
+          <Typography gutterBottom variant="h5">
+            <u>{this.props.name}</u>
           </Typography>
-          <Typography>
-            Mainnet Address: {this.props.address}
+          <Typography noWrap variant="body2" color="textSecondary">
+            Public Address:
+            <br />
+            {this.props.address}
           </Typography>
           <Typography>
             Number of Votes: {this.props.votes || 0}
           </Typography>
         </CardContent>
         <CardActions>
-          <Button size="small" variant="contained" color="primary"
+          <Button size="small" variant="outlined" color="secondary"
             onClick={(event) => {
               this.props.delegateVotes(this.props.name, this.props.address)
             }}

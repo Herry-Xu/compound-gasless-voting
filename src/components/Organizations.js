@@ -55,7 +55,7 @@ class Organizations extends Component {
   render() {
     const { classes } = this.props;
     return (
-      <Container className={classes.cardGrid} maxWidth="md">
+      <Container className={classes.cardGrid} maxWidth="lg">
         <Grid container spacing={4}>
           {this.state.organizations && this.state.organizations.map((org) =>
             <Grid item key={org.name} xs={12} sm={6} md={4}>
