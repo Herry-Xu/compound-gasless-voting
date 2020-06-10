@@ -1,14 +1,31 @@
 import React, { Component } from 'react';
 import clsx from 'clsx';
 import { AppBar, Toolbar, Typography, IconButton, Divider, Drawer, List, ListItem, ListItemIcon, ListItemText, Icon } from '@material-ui/core';
-import MenuIcon from '@material-ui/icons/Menu'
-import DescriptionIcon from '@material-ui/icons/Description'
-import VoteIcon from '@material-ui/icons/RecordVoiceOver'
+import MenuIcon from '@material-ui/icons/Menu';
+import DescriptionIcon from '@material-ui/icons/Description';
+import VoteIcon from '@material-ui/icons/RecordVoiceOver';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
+
+import { Link, BrowserRouter } from 'react-router-dom';
 
 import Identicon from 'identicon.js';
 
 import { withStyles } from '@material-ui/core/styles';
+
+function ListItemLink(props) {
+  const { icon, primary, to } = props
+  const renderLink = React.useMemo(
+    () => React.forwardRef((itemProps, ref) => <Link to={to} ref={ref} {...itemProps} />),
+    [to],
+    )
+
+  return (
+    <ListItem button component={renderLink}>
+      {icon ? <ListItemIcon>{icon}</ListItemIcon> : null}
+      <ListItemText primary={primary} />
+    </ListItem>
+  )
+}
 
 const drawerWidth = 240;
 
@@ -58,6 +75,7 @@ const styles = theme => ({
     height: 30,
   },
 });
+
 
 class NavBar extends Component {
 
@@ -125,20 +143,22 @@ class NavBar extends Component {
             </IconButton>
           </div>
           <Divider />
-          <List>
-            <ListItem button>
-              <ListItemIcon >
-                <VoteIcon color="primary"/>
-              </ListItemIcon >
-              <ListItemText primary="Vote"/>
-            </ListItem>
-            <ListItem button>
-              <ListItemIcon>
-                <DescriptionIcon color="primary"/>
-              </ListItemIcon>
-              <ListItemText primary="Proposals" />
-            </ListItem>
-          </List>
+            <List>
+              <ListItemLink to="/vote" primary="Vote" icon={<VoteIcon />} />
+              <ListItemLink to="/proposals" primary="Proposals" icon={<DescriptionIcon />} />
+              {/* <ListItem button>
+                <ListItemIcon >
+                  <VoteIcon color="primary"/>
+                </ListItemIcon >
+                <ListItemText primary="Vote"/>
+              </ListItem> */}
+              {/* <ListItem button>
+                <ListItemIcon>
+                  <DescriptionIcon color="primary"/>
+                </ListItemIcon>
+                <ListItemText primary="Proposals" />
+              </ListItem> */}
+            </List>
         </Drawer>
       </div>
     );

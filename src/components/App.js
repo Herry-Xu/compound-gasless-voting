@@ -9,6 +9,8 @@ import MyTokens from './MyTokens'
 import Organizations from './Organizations'
 import NavBar from './NavBar'
 
+import { BrowserRouter, Route, Switch } from 'react-router-dom';
+
 // import { legos } from "@studydefi/money-legos";
 
 class App extends Component {
@@ -284,25 +286,30 @@ class App extends Component {
 
   render() {
     return (
-      <React.Fragment>
+      <BrowserRouter>
         <NavBar
           account={this.state.empAddress}
         />
-        <div className="App">
-          <main>
-            <MyTokens
-              initBalance={this.initBalance}
-              empTokens={this.state.empTokens}
-              empVotes={this.state.empVotes}
-            />
-            <Organizations
-              orgAddresses={this.state.orgAddresses}
-              orgVotes={this.state.orgVotes}
-              delegateVotes={this.delegateVotes}
-            />
-          </main>
-        </div>
-      </React.Fragment>
+        <main>
+          <Switch>
+            <Route path="/vote">
+              <MyTokens
+                initBalance={this.initBalance}
+                empTokens={this.state.empTokens}
+                empVotes={this.state.empVotes}
+              />
+              <Organizations
+                orgAddresses={this.state.orgAddresses}
+                orgVotes={this.state.orgVotes}
+                delegateVotes={this.delegateVotes}
+              />
+            </Route>
+            <Route path="/proposals">
+              <div>Proposals</div>
+            </Route>
+          </Switch>
+        </main>
+      </BrowserRouter>
     );
   }
 }
