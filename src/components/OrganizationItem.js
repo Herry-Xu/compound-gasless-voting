@@ -3,19 +3,6 @@ import { Card, CardMedia, CardContent, CardActions, Typography, Button } from '@
 
 import { withStyles } from '@material-ui/core/styles';
 
-const styles = theme => ({
-  root: {
-    maxWidth: 500,
-  },
-  cardMedia: {
-    height: 0,
-    paddingTop: '100%',
-  },
-  cardContent: {
-    flexGrow: 1,
-    textAlign: 'left',
-  },
-});
 
 class OrganizationItem extends Component {
 
@@ -54,5 +41,19 @@ class OrganizationItem extends Component {
     )
   }
 }
+
+const styles = theme => ({
+  root: {
+    maxWidth: 500,
+  },
+  cardMedia: {
+    height: 0,
+    paddingTop: '100%',
+  },
+  cardContent: {
+    flexGrow: 1,
+    textAlign: 'left',
+  },
+});
 
 export default withStyles(styles)(OrganizationItem)

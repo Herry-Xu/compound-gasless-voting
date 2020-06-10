@@ -1,23 +1,7 @@
 import React, { Component } from 'react';
-import { withStyles, Container, Card, CardMedia, Typography, Button } from '@material-ui/core';
+import { withStyles, Container, CardMedia, Typography, Button } from '@material-ui/core';
 
-const styles = theme => ({
-  root: {
-    backgroundColor: theme.palette.background.paper,
-    padding: theme.spacing(8, 0, 6),
-  },
-  cardMedia: {
-    height: 0,
-    display: 'block',
-    marginLeft: 'auto',
-    marginRight: 'auto',
-    marginBottom: theme.spacing(2),
-    paddingTop: '20%',
-    width: '20%',
-  },
-});
-
-class MyTokens extends Component {
+class CompTokenManager extends Component {
 
   render() {
     const { classes } = this.props;
@@ -44,4 +28,20 @@ class MyTokens extends Component {
   }
 }
 
-export default withStyles(styles)(MyTokens)
+const styles = theme => ({
+  root: {
+    backgroundColor: theme.palette.background.paper,
+    padding: theme.spacing(8, 0, 6),
+  },
+  cardMedia: {
+    height: 0,
+    display: 'block',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    marginBottom: theme.spacing(2),
+    paddingTop: '20%',
+    width: '20%',
+  },
+});
+
+export default withStyles(styles)(CompTokenManager)

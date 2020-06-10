@@ -5,7 +5,7 @@ import compoundMain from '../abis/mainnet-abi.json'
 import compoundRopsten from '../abis/ropsten-abi.json'
 import Verification from '../abis/Verification.json'
 import MyContract from '../abis/MyContract.json'
-import MyTokens from './MyTokens'
+import CompTokenManager from './CompTokenManager'
 import Organizations from './Organizations'
 import NavBar from './NavBar'
 
@@ -293,7 +293,7 @@ class App extends Component {
         <main>
           <Switch>
             <Route path="/vote">
-              <MyTokens
+              <CompTokenManager
                 initBalance={this.initBalance}
                 empTokens={this.state.empTokens}
                 empVotes={this.state.empVotes}
