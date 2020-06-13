@@ -1,26 +1,11 @@
 import React, { Component } from 'react';
-import { IconButton, Divider, Drawer, List, ListItem, ListItemIcon, ListItemText } from '@material-ui/core';
+import ListItemLink from './ListItemLink'
+import { IconButton, Divider, Drawer, List } from '@material-ui/core';
 import DescriptionIcon from '@material-ui/icons/Description';
 import VoteIcon from '@material-ui/icons/RecordVoiceOver';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
-import { Link } from 'react-router-dom';
 
 import { withStyles } from '@material-ui/core/styles';
-
-function ListItemLink(props) {
-  const { icon, primary, to } = props
-  const renderLink = React.useMemo(
-    () => React.forwardRef((itemProps, ref) => <Link to={to} ref={ref} {...itemProps} />),
-    [to],
-    )
-
-  return (
-    <ListItem button component={renderLink}>
-      {icon ? <ListItemIcon>{icon}</ListItemIcon> : null}
-      <ListItemText primary={primary} />
-    </ListItem>
-  )
-}
 
 class SideBar extends Component {
 

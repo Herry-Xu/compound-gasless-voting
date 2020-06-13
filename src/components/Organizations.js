@@ -6,6 +6,10 @@ import { withStyles } from '@material-ui/core/styles';
 
 class Organizations extends Component {
 
+  async componentDidMount(){
+    await this.setOrganizations()
+  }
+
   async componentDidUpdate(prevProps) {
     if (prevProps.orgAddresses !== this.props.orgAddresses) {
       await this.setState({ orgAddresses: this.props.orgAddresses })
@@ -49,6 +53,7 @@ class Organizations extends Component {
     const { classes } = this.props;
     return (
       <Container className={classes.cardGrid} maxWidth="md">
+        {console.log("organizations in component:", this.state.organizations)}
         <Grid container spacing={4}>
           {this.state.organizations && this.state.organizations.map((org) =>
             <Grid item key={org.name} xs={12} sm={6} md={4}>

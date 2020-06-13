@@ -9,7 +9,7 @@ import CompTokenManager from './CompTokenManager'
 import Organizations from './Organizations'
 import NavBar from './NavBar'
 
-import { BrowserRouter, Route, Switch } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 
 // import { legos } from "@studydefi/money-legos";
 
@@ -286,7 +286,7 @@ class App extends Component {
 
   render() {
     return (
-      <BrowserRouter>
+      <Router>
         <NavBar
           account={this.state.empAddress}
         />
@@ -309,7 +309,7 @@ class App extends Component {
             </Route>
           </Switch>
         </main>
-      </BrowserRouter>
+      </Router>
     );
   }
 }
